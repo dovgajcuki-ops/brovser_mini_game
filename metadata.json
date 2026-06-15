@@ -1,0 +1,6 @@
+{
+  "name": "Mini Games",
+  "description": "Колекція міні-ігор у темному мінімалістичному стилі: Динозаврик, Тетріс, Змійка, Сапер та 2048 з рекордами.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
