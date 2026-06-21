@@ -38,6 +38,10 @@ export default function ArkanoidGame({ highScore, onUpdateHighScore }: any) {
     document.addEventListener("keyup", keyUpHandler);
 
     const update = () => {
+      if ((window as any).__GAME_PAUSED__) {
+        animId = requestAnimationFrame(update);
+        return;
+      }
       if (gameOver) return;
 
       // Draw
@@ -112,7 +116,7 @@ export default function ArkanoidGame({ highScore, onUpdateHighScore }: any) {
   return (
     <div className="flex flex-col items-center">
       <div className="text-sm font-mono tracking-widest text-cyan-500 mb-4 font-bold">ARCADE: {score}</div>
-      <canvas ref={canvasRef} width={400} height={400} className="bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl" />
+      <canvas ref={canvasRef} width={400} height={400} className="bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl max-w-full h-auto object-contain" />
       {gameOver && <button onClick={() => { setGameOver(false); setScore(0); }} className="mt-4 px-4 py-2 bg-blue-600 rounded text-white font-bold">Грати знову</button>}
     </div>
   );

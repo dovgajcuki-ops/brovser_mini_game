@@ -27,6 +27,10 @@ export default function FlappyBirdGame({ highScore, onUpdateHighScore }: any) {
     window.addEventListener("keydown", keyDownHandler);
 
     const update = () => {
+      if ((window as any).__GAME_PAUSED__) {
+        animId = requestAnimationFrame(update);
+        return;
+      }
       if (gameOver) return;
       ctx.fillStyle = '#0ea5e9'; // sky
       ctx.fillRect(0, 0, 300, 400);
@@ -84,7 +88,7 @@ export default function FlappyBirdGame({ highScore, onUpdateHighScore }: any) {
   return (
     <div className="flex flex-col items-center">
       <div className="text-3xl font-bold font-mono tracking-widest text-zinc-100 mb-2 absolute z-10 select-none pointer-events-none mt-4 outline-text">{score}</div>
-      <canvas ref={canvasRef} width={300} height={400} onClick={() => !gameOver && window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }))} className="bg-sky-500 border-4 border-zinc-900 rounded-lg cursor-pointer" />
+      <canvas ref={canvasRef} width={300} height={400} onClick={() => !gameOver && window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }))} className="bg-sky-500 border-4 border-zinc-900 rounded-lg cursor-pointer max-w-full h-auto object-contain" />
       {gameOver && <button onClick={() => { setGameOver(false); setScore(0); }} className="mt-4 px-4 py-2 bg-yellow-500 text-zinc-950 font-bold rounded shadow-lg hover:bg-yellow-400">Спробувати ще</button>}
     </div>
   );

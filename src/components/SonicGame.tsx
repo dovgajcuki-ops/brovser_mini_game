@@ -35,6 +35,10 @@ export default function SonicGame({ highScore, onUpdateHighScore }: any) {
     window.addEventListener("keydown", keyDownHandler);
 
     const update = () => {
+      if ((window as any).__GAME_PAUSED__) {
+        animId = requestAnimationFrame(update);
+        return;
+      }
       if (gameOver) return;
 
       sonic.vY += sonic.g;
@@ -121,7 +125,7 @@ export default function SonicGame({ highScore, onUpdateHighScore }: any) {
   return (
     <div className="flex flex-col items-center">
       <div className="absolute z-10 p-2 text-yellow-300 font-mono font-bold">{score} SCORE</div>
-      <canvas ref={canvasRef} width={400} height={200} onClick={() => !gameOver && window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }))} className="bg-sky-500 rounded border-4 border-blue-900 shadow-xl cursor-pointer" />
+      <canvas ref={canvasRef} width={400} height={200} onClick={() => !gameOver && window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }))} className="bg-sky-500 rounded border-4 border-blue-900 shadow-xl cursor-pointer max-w-full h-auto object-contain" />
       {gameOver && <button onClick={() => { setGameOver(false); setScore(0); }} className="mt-4 px-4 py-2 bg-blue-600 rounded text-white font-bold hover:bg-blue-500">Швидше!</button>}
     </div>
   );

@@ -27,7 +27,9 @@ import CookieClickerGame from './components/CookieClickerGame';
 import MarioGame from './components/MarioGame';
 import SonicGame from './components/SonicGame';
 import DonkeyKongGame from './components/DonkeyKongGame';
-import { Gamepad2, ChevronLeft, Trophy, Github, Keyboard, HelpCircle, Heart, Minimize2 } from 'lucide-react';
+import TanksGame from './components/TanksGame';
+import ShooterGame from './components/ShooterGame';
+import { Gamepad2, ChevronLeft, Trophy, Github, Keyboard, HelpCircle, Heart, Minimize2, X, ZoomIn, ZoomOut, Settings } from 'lucide-react';
 
 const GAMES: GameInfo[] = [
   {
@@ -200,6 +202,25 @@ const GAMES: GameInfo[] = [
   },
 ];
 
+const GAMES_3D: GameInfo[] = [
+  {
+    id: 'tanks',
+    title: 'Tanks 3D',
+    description: 'Битва у відкритому 3D світі онлайн',
+    instructions: 'WASD - рух, Миша - приціл, ЛКМ - вогонь.',
+    icon: 'target',
+    accentColor: 'from-emerald-600 to-green-800',
+  },
+  {
+    id: 'shooter',
+    title: 'CS 2D (3D)',
+    description: 'Командна гра у форматі 3D-шутера з відкритим онлайном',
+    instructions: 'WASD - рух, Миша - огляд, ЛКМ - вогонь. Пробіл - стрибок.',
+    icon: 'target',
+    accentColor: 'from-blue-600 to-blue-800',
+  }
+];
+
 const INITIAL_HIGH_SCORES: HighScores = {
   dino: 0,
   tetris: 0,
@@ -222,10 +243,15 @@ const INITIAL_HIGH_SCORES: HighScores = {
   mario: 0,
   sonic: 0,
   donkeykong: 0,
+  tanks: 0,
+  shooter: 0,
 };
 
 export default function App() {
   const [selectedGameId, setSelectedGameId] = useState<GameId | null>(null);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showSettingsMobile, setShowSettingsMobile] = useState(false);
+  const [gameZoom, setGameZoom] = useState(1);
   const [highScores, setHighScores] = useState<HighScores>(INITIAL_HIGH_SCORES);
   const [totalScoreSum, setTotalScoreSum] = useState(0);
 
@@ -250,6 +276,11 @@ export default function App() {
     setTotalScoreSum(sum);
   }, [highScores]);
 
+  // Handle Pause State for games based on mobile settings popup
+  useEffect(() => {
+    (window as any).__GAME_PAUSED__ = showSettingsMobile;
+  }, [showSettingsMobile]);
+
   // Handle Score Updates
   const handleUpdateHighScore = (gameId: GameId, nextScore: number) => {
     setHighScores((prev) => {
@@ -270,7 +301,7 @@ export default function App() {
     return 'Доброї ночі';
   };
 
-  const selectedGameInfo = GAMES.find((g) => g.id === selectedGameId);
+  const selectedGameInfo = GAMES.find((g) => g.id === selectedGameId) || GAMES_3D.find((g) => g.id === selectedGameId);
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans relative antialiased selection:bg-zinc-800 selection:text-white">
@@ -308,13 +339,32 @@ export default function App() {
         </div>
 
         {/* Dynamic Cards Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="games-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12" id="games-grid">
           {GAMES.map((game) => (
             <GameCard
               key={game.id}
               game={game}
               highScore={highScores[game.id]}
-              onSelect={(id) => setSelectedGameId(id)}
+              onSelect={(id) => { setSelectedGameId(id); setGameZoom(1); }}
+            />
+          ))}
+        </div>
+
+        {/* 3D Games Section */}
+        <div className="mb-10 max-w-xl">
+          <h2 className="text-2xl font-bold font-sans text-zinc-100 tracking-tight mt-1">3D Ігри</h2>
+          <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+            Повноцінні 3D ігри з підтримкою онлайну
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="games-3d-grid">
+          {GAMES_3D.map((game) => (
+            <GameCard
+              key={game.id}
+              game={game}
+              highScore={highScores[game.id]}
+              onSelect={(id) => { setSelectedGameId(id); setGameZoom(1); }}
             />
           ))}
         </div>
@@ -338,10 +388,20 @@ export default function App() {
           id="game-fullscreen-portal"
           className="fixed inset-0 bg-[#09090b]/98 backdrop-blur-md z-50 flex flex-col overflow-hidden animate-fade-in"
         >
+          {/* Persistent high-contrast Floating Close (X) button at the top-right of the screen */}
+          <button
+            onClick={() => { setSelectedGameId(null); setGameZoom(1); }}
+            className="fixed top-3 right-3 sm:top-4 sm:right-4 z-[99] p-2 sm:p-2.5 bg-red-600/90 hover:bg-red-500 text-white hover:scale-105 active:scale-95 border border-red-500/30 rounded-xl shadow-[0_4px_12px_rgba(239,68,68,0.3)] transition-all cursor-pointer flex items-center justify-center gap-1.5 font-mono text-xs font-bold leading-none select-none"
+            title="Закрити вікно гри"
+          >
+            <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            <span className="hidden xs:inline">Закрити</span>
+          </button>
+
           {/* Unfolded Header Bar */}
-          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between border-b border-zinc-900">
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between border-b border-zinc-900 pr-24 sm:pr-28">
             <button
-              onClick={() => setSelectedGameId(null)}
+              onClick={() => { setSelectedGameId(null); setGameZoom(1); }}
               id="fullscreen-back-btn"
               className="group flex items-center gap-2 px-3.5 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 transition-all font-mono"
             >
@@ -349,26 +409,93 @@ export default function App() {
               <span>Повернутися</span>
             </button>
 
-            <div className="text-center">
+            <div className="text-center hidden sm:block">
               <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">АКТИВНА ГРА</span>
               <h2 className="text-base font-semibold text-zinc-100 tracking-tight leading-none mt-0.5">
                 {selectedGameInfo.title}
               </h2>
             </div>
 
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg font-mono text-xs text-zinc-400">
-              <Trophy className="w-3.5 h-3.5 text-amber-500 mr-0.5" />
-              <span>Ваш рекорд: </span>
-              <span className="font-bold text-amber-500 text-sm leading-none">
-                {highScores[selectedGameId]}
-              </span>
+            <div className="flex items-center gap-2">
+              {/* Mobile Settings Button */}
+              <div className="relative sm:hidden">
+                <button
+                  onClick={() => setShowSettingsMobile(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg font-mono text-xs transition-all ${
+                    showSettingsMobile
+                      ? 'bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800'
+                      : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-zinc-300 hover:border-zinc-800'
+                  }`}
+                  title={showSettingsMobile ? 'Закрити налаштування' : 'Налаштування'}
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
+                
+                {showSettingsMobile && (
+                  <div className="absolute right-0 top-full mt-2 p-3 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl z-50 flex flex-col gap-3 min-w-[170px] animate-fade-in">
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Налаштування</div>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[10px] text-zinc-400 font-mono">Масштаб гри</span>
+                      <div className="flex items-center justify-between gap-1 px-1 py-1 bg-zinc-950 border border-zinc-900 rounded-lg">
+                        <button onClick={() => setGameZoom(z => Math.max(z - 0.1, 0.3))} className="p-2 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded transition" title="Віддалити">
+                          <ZoomOut className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setGameZoom(1)} className="text-[10px] font-mono text-zinc-400 w-10 text-center hover:text-zinc-200 transition" title="Скинути масштаб">
+                          {Math.round(gameZoom * 100)}%
+                        </button>
+                        <button onClick={() => setGameZoom(z => Math.min(z + 0.1, 2.5))} className="p-2 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded transition" title="Збільшити">
+                          <ZoomIn className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="hidden sm:flex items-center gap-1 px-1 py-1 bg-zinc-950 border border-zinc-900 rounded-lg">
+                <button onClick={() => setGameZoom(z => Math.max(z - 0.1, 0.3))} className="p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded transition" title="Віддалити">
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <button onClick={() => setGameZoom(1)} className="text-[10px] font-mono text-zinc-400 w-10 text-center hover:text-zinc-200 transition" title="Скинути масштаб">
+                  {Math.round(gameZoom * 100)}%
+                </button>
+                <button onClick={() => setGameZoom(z => Math.min(z + 0.1, 2.5))} className="p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded transition" title="Збільшити">
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Toggle instructions button */}
+              <button
+                onClick={() => setShowInstructions(prev => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg font-mono text-xs transition-all ${
+                  showInstructions
+                    ? 'bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800'
+                    : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-zinc-300 hover:border-zinc-800'
+                }`}
+                title={showInstructions ? 'Сховати довідку' : 'Показати довідку'}
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">{showInstructions ? 'Сховати довідку' : 'Довідка'}</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg font-mono text-xs text-zinc-400">
+                <Trophy className="w-3.5 h-3.5 text-amber-500 mr-0.5" />
+                <span className="hidden xs:inline">Рекорд: </span>
+                <span className="font-bold text-amber-500 text-sm leading-none">
+                  {highScores[selectedGameId]}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Active core game frame cabinet wrapper */}
-          <div className="flex-1 flex flex-col md:flex-row max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-hidden md:overflow-visible">
             {/* Real Game Component Renderer */}
             <div className="flex-1 bg-zinc-950/45 border border-zinc-900 rounded-2xl relative flex items-center justify-center p-2 sm:p-6 overflow-hidden md:max-h-[calc(100vh-170px)]">
+              <div 
+                className={`transition-all duration-200 w-full flex-col flex items-center justify-center h-full ${showSettingsMobile ? 'pointer-events-none opacity-50' : ''}`}
+                style={{ transform: `scale(${gameZoom})`, transformOrigin: 'center' }}
+              >
               {selectedGameId === 'dino' && (
                 <DinoGame
                   highScore={highScores.dino}
@@ -447,37 +574,55 @@ export default function App() {
               {selectedGameId === 'donkeykong' && (
                 <DonkeyKongGame highScore={highScores.donkeykong} onUpdateHighScore={(s) => handleUpdateHighScore('donkeykong', s)} />
               )}
+              {selectedGameId === 'tanks' && (
+                <TanksGame highScore={highScores.tanks} onUpdateHighScore={(s) => handleUpdateHighScore('tanks', s)} />
+              )}
+              {selectedGameId === 'shooter' && (
+                <ShooterGame highScore={highScores.shooter} onUpdateHighScore={(s) => handleUpdateHighScore('shooter', s)} />
+              )}
+              </div>
             </div>
 
             {/* Cabinet Info instructions side drawer on widescreen layout */}
-            <div className="w-full md:w-64 border-t md:border-t-0 md:border-l border-zinc-900 mt-4 md:mt-0 pt-4 md:pt-0 md:pl-6 flex flex-col gap-4 select-none font-mono">
-              <div>
-                <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5" /> Швидка довідка
-                </h4>
-                <p className="text-xs text-zinc-400 leading-relaxed mt-2 p-3 bg-zinc-950/60 border border-zinc-900/60 rounded-xl">
-                  {selectedGameInfo.instructions}
-                </p>
-              </div>
+            {showInstructions && (
+              <div className="w-full md:w-64 border-t md:border-t-0 md:border-l border-zinc-900 mt-4 md:mt-0 pt-4 md:pt-0 md:pl-6 flex flex-col gap-4 select-none font-mono">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5" /> Швидка довідка
+                    </h4>
+                    <button
+                      onClick={() => setShowInstructions(false)}
+                      className="text-zinc-500 hover:text-zinc-350 p-1 rounded hover:bg-zinc-900/50 transition-all cursor-pointer"
+                      title="Сховати довідку"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed p-3 bg-zinc-950/60 border border-zinc-900/60 rounded-xl">
+                    {selectedGameInfo.instructions}
+                  </p>
+                </div>
 
-              <div className="hidden md:block">
-                <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">
-                  Мінімалістична металічна тема
-                </h4>
-                <p className="text-[11px] text-zinc-500 leading-relaxed mt-2 leading-relaxed">
-                  Цей аркадний портал використовує темні кольори та лаконічний дизайн, щоб ви могли повністю сфокусуватися на грі. Всі звуки генеруються за допомогою Web Audio API без використання сторонніх аудіофайлів.
-                </p>
-              </div>
+                <div className="hidden md:block">
+                  <h4 className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">
+                    Мінімалістична металічна тема
+                  </h4>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed mt-2 leading-relaxed">
+                    Цей аркадний портал використовує темні кольори та лаконічний дизайн, щоб ви могли повністю сфокусуватися на грі. Всі звуки генеруються за допомогою Web Audio API без використання сторонніх аудіофайлів.
+                  </p>
+                </div>
 
-              {/* Back out button for convenient mobile space */}
-              <button
-                onClick={() => setSelectedGameId(null)}
-                className="mt-auto px-4 py-2.5 md:flex items-center justify-center gap-1 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-xl text-xs text-zinc-400 hover:text-zinc-200 transition-all text-center w-full"
-              >
-                <Minimize2 className="w-4 h-4 mr-1" />
-                <span>Згорнути вікно</span>
-              </button>
-            </div>
+                {/* Back out button for convenient mobile space */}
+                <button
+                  onClick={() => { setSelectedGameId(null); setGameZoom(1); }}
+                  className="mt-auto px-4 py-2.5 md:flex items-center justify-center gap-1 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-xl text-xs text-zinc-400 hover:text-zinc-200 transition-all text-center w-full"
+                >
+                  <Minimize2 className="w-4 h-4 mr-1" />
+                  <span>Згорнути вікно</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

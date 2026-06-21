@@ -37,15 +37,23 @@ export default function DonkeyKongGame({ highScore, onUpdateHighScore }: any) {
     let currentScore = 0;
 
     const update = () => {
+      if ((window as any).__GAME_PAUSED__) {
+        animId = requestAnimationFrame(update);
+        return;
+      }
       if (gameOver) return;
 
       // Logic
       player.vY += player.g;
+      if (player.vY > 8) player.vY = 8;
       player.y += player.vY;
 
       let onFloor = false;
       floors.forEach(f => {
-          if (player.y + player.r >= f.y && player.y + player.r <= f.y + 10 && player.x > f.x && player.x < f.x + f.w) {
+          let prevBottom = player.y - player.vY + player.r;
+          let currBottom = player.y + player.r;
+          // Check if previously above or slightly inside, and currently below top of floor
+          if (prevBottom <= f.y + 10 && currBottom >= f.y && player.x > f.x - player.r && player.x < f.x + f.w + player.r) {
               if (player.vY >= 0) {
                   player.y = f.y - player.r;
                   player.vY = 0;
@@ -122,7 +130,7 @@ export default function DonkeyKongGame({ highScore, onUpdateHighScore }: any) {
   return (
     <div className="flex flex-col items-center">
         <div className="text-zinc-500 mb-2 font-mono tracking-widest text-sm">SCORE: <span className="text-white font-bold">{score}</span></div>
-        <canvas ref={canvasRef} width={400} height={400} className="border-4 border-red-900 rounded bg-black" />
+        <canvas ref={canvasRef} width={400} height={400} className="border-4 border-red-900 rounded bg-black max-w-full h-auto object-contain" />
         {gameOver && <button onClick={() => { setGameOver(false); setScore(0); }} className="mt-4 px-6 py-2 bg-red-600 text-white font-bold rounded">RESTART</button>}
     </div>
   );

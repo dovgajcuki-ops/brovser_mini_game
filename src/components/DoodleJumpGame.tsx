@@ -41,6 +41,10 @@ export default function DoodleJumpGame({ highScore, onUpdateHighScore }: any) {
     document.addEventListener("keyup", keyUpHandler);
 
     const update = () => {
+      if ((window as any).__GAME_PAUSED__) {
+        animId = requestAnimationFrame(update);
+        return;
+      }
       if (gameOver) return;
 
       // Draw
@@ -118,7 +122,7 @@ export default function DoodleJumpGame({ highScore, onUpdateHighScore }: any) {
   return (
     <div className="flex flex-col items-center">
       <div className="text-xl font-bold font-mono tracking-widest text-lime-400 mb-2">{score}</div>
-      <canvas ref={canvasRef} width={300} height={400} className="bg-white border-2 border-zinc-700 rounded-lg shadow-xl" />
+      <canvas ref={canvasRef} width={300} height={400} className="bg-white border-2 border-zinc-700 rounded-lg shadow-xl max-w-full h-auto object-contain" />
       {gameOver && <button onClick={() => { setGameOver(false); setScore(0); }} className="mt-4 px-4 py-2 bg-lime-500 rounded text-zinc-900 font-bold hover:bg-lime-400">Стрибати знову</button>}
     </div>
   );

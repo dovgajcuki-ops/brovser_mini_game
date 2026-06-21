@@ -394,13 +394,16 @@ export default function MinesweeperGame({ highScore, onUpdateHighScore }: Minesw
       </div>
 
       {/* Main Grid Board */}
-      <div className="flex-1 flex items-center justify-center w-full max-w-md overflow-auto my-auto py-2">
+      <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden my-auto py-2">
         <div
           id="ms-board-container"
-          className="grid gap-1 p-2 bg-zinc-950 border-2 border-zinc-900 rounded shadow-2xl"
+          className="grid gap-0.5 p-2 bg-zinc-950 border-2 border-zinc-900 rounded shadow-2xl h-full aspect-auto sm:gap-1"
           style={{
             gridTemplateRows: `repeat(${CONFIGS[difficulty].rows}, minmax(0, 1fr))`,
             gridTemplateColumns: `repeat(${CONFIGS[difficulty].cols}, minmax(0, 1fr))`,
+            aspectRatio: `${CONFIGS[difficulty].cols} / ${CONFIGS[difficulty].rows}`,
+            maxHeight: "100%",
+            maxWidth: "100%"
           }}
         >
           {board.map((row, rIdx) =>
@@ -409,7 +412,7 @@ export default function MinesweeperGame({ highScore, onUpdateHighScore }: Minesw
               const isFlagged = cell.isFlagged;
               const hasMine = cell.hasMine;
 
-              let cellClass = "w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-xs sm:text-sm font-bold flex items-center justify-center rounded border cursor-pointer select-none transition-all duration-100 ";
+              let cellClass = "w-full h-full text-[10px] sm:text-[11px] md:text-xs font-bold flex items-center justify-center rounded border cursor-pointer select-none transition-all duration-100 min-w-0 min-h-0 ";
               
               if (isRevealed) {
                 cellClass += hasMine 

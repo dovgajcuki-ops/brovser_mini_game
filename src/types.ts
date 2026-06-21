@@ -1,4 +1,4 @@
-export type GameId = 'dino' | 'tetris' | 'snake' | 'minesweeper' | '2048' | 'pacman' | 'solitaire' | 'tictactoe' | 'arkanoid' | 'wordle' | 'sudoku' | 'mahjong' | 'alchemy' | 'chess' | 'battleship' | 'flappybird' | 'doodlejump' | 'cookieclicker' | 'mario' | 'sonic' | 'donkeykong';
+export type GameId = 'dino' | 'tetris' | 'snake' | 'minesweeper' | '2048' | 'pacman' | 'solitaire' | 'tictactoe' | 'arkanoid' | 'wordle' | 'sudoku' | 'mahjong' | 'alchemy' | 'chess' | 'battleship' | 'flappybird' | 'doodlejump' | 'cookieclicker' | 'mario' | 'sonic' | 'donkeykong' | 'tanks' | 'shooter';
 
 export interface GameInfo {
   id: GameId;
@@ -31,4 +31,6 @@ export interface HighScores {
   mario: number;
   sonic: number;
   donkeykong: number;
+  tanks: number;
+  shooter: number;
 }

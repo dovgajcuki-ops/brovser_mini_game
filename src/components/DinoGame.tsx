@@ -159,6 +159,10 @@ export default function DinoGame({ highScore, onUpdateHighScore }: DinoProps) {
 
   // Main high-performance game loop (60FPS Canvas render)
   const gameLoop = (timestamp: number) => {
+    if ((window as any).__GAME_PAUSED__) {
+      stateRef.current.animationFrameId = requestAnimationFrame(gameLoop);
+      return;
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

@@ -319,6 +319,7 @@ export default function TetrisGame({ highScore, onUpdateHighScore }: TetrisProps
 
     const currentSpeed = Math.max(100, 700 - lines * 15); // Speed acceleration!
     gameIntervalRef.current = setInterval(() => {
+      if ((window as any).__GAME_PAUSED__) return;
       dropPiece();
     }, currentSpeed);
 

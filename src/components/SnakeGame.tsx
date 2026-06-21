@@ -121,6 +121,7 @@ export default function SnakeGame({ highScore, onUpdateHighScore }: SnakeProps) 
     if (!isStarted || isGameOver) return;
 
     gameLoopRef.current = setInterval(() => {
+      if ((window as any).__GAME_PAUSED__) return;
       moveSnake();
     }, speed);
 
